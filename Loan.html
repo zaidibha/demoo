@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auto Loan Calculator</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+            margin: 0;
+        }
+
+        .calculator {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 500px;
+        }
+
+        .calculator h1 {
+            margin-top: 0;
+            font-size: 1.5em;
+            text-align: center;
+        }
+
+        .calculator div {
+            margin-bottom: 15px;
+        }
+
+        .calculator label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .calculator input[type="range"] {
+            width: 100%;
+        }
+
+        .calculator button {
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .calculator button:hover {
+            background-color: #0056b3;
+        }
+
+        #result {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 1.2em;
+        }
+
+        input:hover {
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <h1>Auto Loan Calculator</h1>
+        <div>
+            <label for="propertyPrice">Property Price<br><br> <span id="propertyPriceValue">PKR </span></label>
+            <input type="range" id="propertyPrice" min="0" max="1000000000" step="1000" value="0" oninput="updateValue('propertyPrice', 'propertyPriceValue', ' PKR')">
+        </div>
+        <div>
+            <label for="downPayment">Down Payment <br><br> <span id="downPaymentValue">PKR </span></label>
+            <input type="range" id="downPayment" min="0" max="50000000" step="500" value="0" oninput="updateValue('downPayment', 'downPaymentValue', ' PKR')">
+        </div>
+        <div>
+            <label for="interestRate">Interest Rate (%)<br><br> <span id="interestRateValue">0 %</span></label>
+            <input type="range" id="interestRate" min="0" max="20" step="0.1" value="0" oninput="updateValue('interestRate', 'interestRateValue', ' %')">
+        </div>
+        <div>
+            <label for="loanPeriod">Loan Period (years)<br><br> <span id="loanPeriodValue">0 years</span></label>
+            <input type="range" id="loanPeriod" min="0" max="30" step="1" value="0" oninput="updateValue('loanPeriod', 'loanPeriodValue', ' years')">
+        </div>
+        <button onclick="calculateLoan()">Calculate</button>
+        <div id="result"></div>
+    </div>
+    <script>
+        function numberToWords(number) {
+            const units = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine'];
+            const tens = ['', 'ten', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
+            const teens = ['', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen'];
+
+            let words = '';
+
+            if (number >= 10000000) {
+                words += numberToWords(Math.floor(number / 10000000)) + ' crore ';
+                number %= 10000000;
+            }
+
+            if (number >= 100000) {
+                words += numberToWords(Math.floor(number / 100000)) + ' lakh ';
+                number %= 100000;
+            }
+
+            if (number >= 1000) {
+                words += numberToWords(Math.floor(number / 1000)) + ' thousand ';
+                number %= 1000;
+            }
+
+            if (number >= 100) {
+                words += numberToWords(Math.floor(number / 100)) + ' hundred ';
+                number %= 100;
+            }
+
+            if (number >= 20) {
+                words += tens[Math.floor(number / 10)] + ' ';
+                number %= 10;
+            }
+
+            if (number > 0) {
+                if (number < 10) {
+                    words += units[number];
+                } else {
+                    words += teens[number - 10];
+                }
+            }
+
+            return words.trim();
+        }
+
+        function updateValue(sliderId, spanId, unit) {
+            const slider = document.getElementById(sliderId);
+            const span = document.getElementById(spanId);
+            const numericValue = slider.value;
+            const wordsValue = numberToWords(parseInt(numericValue, 10)).trim();
+            span.innerText = `${numericValue} (${wordsValue} ${unit})`;
+        }
+
+        function calculateLoan() {
+            const propertyPrice = document.getElementById('propertyPrice').value;
+            const downPayment = document.getElementById('downPayment').value;
+            const interestRate = document.getElementById('interestRate').value;
+            const loanPeriod = document.getElementById('loanPeriod').value;
+
+            if (propertyPrice === "" || downPayment === "" || interestRate === "" || loanPeriod === "") {
+                alert("Please fill in all fields");
+                return;
+            }
+
+            const loanAmount = propertyPrice - downPayment;
+            const monthlyInterestRate = (interestRate / 100) / 12;
+            const numberOfPayments = loanPeriod * 12;
+            const numerator = monthlyInterestRate * Math.pow(1 + monthlyInterestRate, numberOfPayments);
+            const denominator = Math.pow(1 + monthlyInterestRate, numberOfPayments) - 1;
+            const monthlyPayment = loanAmount * (numerator / denominator);
+
+            document.getElementById('result').innerText = `Monthly Payment: ${monthlyPayment.toFixed(2)} PKR`;
+        }
+    </script>
+</body>
+</html>
